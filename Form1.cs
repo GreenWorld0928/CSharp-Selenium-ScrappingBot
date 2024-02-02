@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using OpenQA.Selenium.Support.UI;
 
 namespace ScrappingBot
 {
@@ -33,14 +34,42 @@ namespace ScrappingBot
             inputFields[0].SendKeys("selimdinc");
             inputFields[1].SendKeys("6465dincka");
             inputFields[2].Click();
-
-
-            //driver.FindElement(By.Id("a3a0d7182")).SendKeys("selimdinc");
-            //driver.FindElement(By.Id("a1e74233e")).SendKeys("6465dincka");
+           
+                       
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             driver.Close();
+        }
+
+        private async void startBtn_Click(object sender, EventArgs e)
+        {
+            driver.FindElement(By.Id("rbas_place_sell_ad")).Click();
+            driver.FindElement(By.Id("ef_brand")).SendKeys("Volvo");
+            driver.FindElement(By.Id("ef_model")).SendKeys("EC55C");
+            driver.FindElement(By.Id("category-browse")).Click();
+
+            var catalog = driver.FindElement(By.Id("ef_catalog"));
+            var selectElement = new SelectElement(catalog);
+            selectElement.SelectByText("Construction");
+
+            await Task.Delay(3000);
+
+            var maincategory = driver.FindElement(By.Id("ef_maincategory"));
+            selectElement = new SelectElement(maincategory);
+            selectElement.SelectByText("Excavators");
+
+            await Task.Delay(3000);
+            var subcategory = driver.FindElement(By.Id("ef_subcategory"));
+            selectElement = new SelectElement(subcategory);
+            selectElement.SelectByText("Mini excavators < 7t (Mini diggers)");
+
+            driver.FindElement(By.Id("form-continue-button")).Click();
+        }
+
+        private void loadBtn_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
