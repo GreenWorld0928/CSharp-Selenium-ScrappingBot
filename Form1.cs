@@ -45,7 +45,16 @@ namespace ScrappingBot
 
                     driver.FindElement(By.Id("rbas_place_sell_ad")).Click();
                     driver.FindElement(By.Id("ef_brand")).SendKeys(fieldValue[1]);
-                    driver.FindElement(By.Id("ef_model")).SendKeys(fieldValue[2]);
+                    driver.FindElement(By.Id("ef_model")).SendKeys(fieldValue[2]);                                    
+
+                    try
+                    {
+                        driver.FindElement(By.Id("ef_itemtype_2")).Click();
+                    }
+                    catch (Exception)
+                    {
+                    }
+
                     driver.FindElement(By.Id("category-browse")).Click();
 
                     var catalog = driver.FindElement(By.Id("ef_catalog"));
@@ -111,14 +120,56 @@ namespace ScrappingBot
                     selectElement = new SelectElement(yearofmanufacture);
                     selectElement.SelectByText(fieldValue[6]);
 
+                    count = 0;
+                    while (true)
+                    {
+                        try
+                        {
+                            Thread.Sleep(500);
+                            var tractorType = driver.FindElement(By.Id("ef_tractortype"));
+                            selectElement = new SelectElement(tractorType);
+                            selectElement.SelectByValue("1000100");
+                            break;
+                        }
+                        catch (Exception)
+                        {
+                            count++;
+                            if (count < 2) continue;
+                            else break;
+                        }
+                    }
+
                     driver.FindElement(By.Id("ef_meterreadouthours")).SendKeys(fieldValue[7]);
 
 
                     driver.FindElement(By.Id("ef_otherinformation")).SendKeys(fieldValue[8]);
                     driver.FindElement(By.Id("otherinformation_addbutton")).Click();
 
+                    var locationInfo = driver.FindElement(By.Id("ef_useraddressbookid"));
+                    selectElement = new SelectElement(locationInfo);
+                    selectElement.SelectByValue("ChooseRbYard");
+
+                    count = 0;
+                    while (true)
+                    {
+                        try
+                        {
+                            Thread.Sleep(500);
+                            var assetCustomYardLocation = driver.FindElement(By.Id("ef_assetCustomYardLocation"));
+                            selectElement = new SelectElement(assetCustomYardLocation);
+                            selectElement.SelectByValue("21");
+                            driver.FindElement(By.Id("assetCustomUserLocationsSave")).Click();
+                            break;
+                        }
+                        catch (Exception)
+                        {
+                            count++;
+                            if (count < 6) continue;
+                            else break;
+                        }
+                    }
                     //driver.FindElements(By.ClassName("image_uploader_button"))[0].Click();
-                                                         
+
                     string[] fileNames = fieldValue[9].Split('#');
                     string fullFileNames = directoryPath + string.Join(" \n " + directoryPath, fileNames);
                     try
@@ -152,7 +203,6 @@ namespace ScrappingBot
         {
             try
             {
-                //driver.Navigate().Refresh();
                 driver.FindElement(By.Id("noti-badge-3784")).Click();
                 driver.FindElements(By.CssSelector("i[class='fas fa-angle-down']"))[0].Click();
                 driver.FindElement(By.Id("divfilter_item_64")).Click();
@@ -161,10 +211,10 @@ namespace ScrappingBot
                 
                 int msgNum = Convert.ToInt32(totalMsg);
                 int unReadMsgNum = 0;
-                //MessageBox.Show(msgNum.ToString());
 
                 for (int i = 0; i < (msgNum - 1) / 30 + 1; i++)
                 {
+                    driver.FindElement(By.Id("selectAll")).Click();
                     try
                     {
                         var MsgElements = driver.FindElements(By.CssSelector("div[class='row form-inline bottomdashed p-3']"));
@@ -183,12 +233,10 @@ namespace ScrappingBot
                                     tw.WriteLine(str);
                                     tw.Close();
                                     unReadMsgNum++;
-                                    MsgElements[j].FindElement(By.Id("message-checkbox")).Click();
                                 }
                             }
                             catch
                             {
-                                MsgElements[j].FindElement(By.Id("message-checkbox")).Click();
                                 continue;
                             }
                         }
@@ -203,15 +251,11 @@ namespace ScrappingBot
 
                     try
                     {
-                        //driver.SwitchTo().Alert().Accept();
+                       // driver.SwitchTo().Alert().Accept();
                     }
                     catch (NoAlertPresentException ex)
                     {
                     }
-                    //if (msgNum - 30 * (i + 1) > 0)
-                    //{
-                    //    driver.FindElements(By.CssSelector("a[class='page-link']"))[0].Click();
-                    //}
                 }
                 this.msgStatusLabel.Text = unReadMsgNum + " unread message(s) saved";
             }
@@ -245,10 +289,9 @@ namespace ScrappingBot
             driver.Navigate().GoToUrl(baseURL);
             var loginForm = driver.FindElement(By.Id("login_form"));
             var inputFields = loginForm.FindElements(By.TagName("input"));
-            inputFields[0].SendKeys("selimdinc");
-            inputFields[1].SendKeys("6465dincka");
+            //inputFields[0].SendKeys("christian@bks.dk");
+            //inputFields[1].SendKeys("Cks00005159");
             //inputFields[2].Click();
-            
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
@@ -328,14 +371,14 @@ namespace ScrappingBot
         {
             timeLeft = timeLeft.Subtract(new TimeSpan(0, 0, 1));
             leftTimeLabel.Text = timeLeft.Minutes.ToString()+ "min " + timeLeft.Seconds.ToString()+"s " + "after rechecking inbox";
-            if (timeLeft.Seconds == 0)
+            if (timeLeft.Minutes == 0)
             {
-                msgStatusLabel.Text = "running";
+                msgStatusLabel.Text = "Checking Inbox ... ... ...";
                 trdChingInbox = new Thread(new ThreadStart(this.ThreadCheckingInbox));
                 trdChingInbox.IsBackground = true;
                 trdChingInbox.Start();
                 startBtn.Enabled = false;
-                timeLeft = TimeSpan.FromSeconds(30);
+                timeLeft = TimeSpan.FromMinutes(30);
             }
         }
         private void stopCheckBtn_Click(object sender, EventArgs e)
