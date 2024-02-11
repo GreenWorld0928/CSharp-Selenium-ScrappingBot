@@ -55,6 +55,9 @@ namespace ScrappingBot
                     {
                     }
 
+                    //driver.FindElement(By.Id("category-search")).Click();
+                    //driver.FindElement(By.Id("category-suggestions")).FindElements(By.CssSelector("a"))[0].Click();
+
                     driver.FindElement(By.Id("category-browse")).Click();
 
                     var catalog = driver.FindElement(By.Id("ef_catalog"));
@@ -81,14 +84,16 @@ namespace ScrappingBot
                     count = 0;
                     while (true)
                     {
-                        try {
+                        try
+                        {
                             Thread.Sleep(500);
                             var maincategory = driver.FindElement(By.Id("ef_maincategory"));
                             selectElement = new SelectElement(maincategory);
                             selectElement.SelectByText(fieldValue[4]);
                             break;
-                        } catch (Exception)
-                        {  
+                        }
+                        catch (Exception)
+                        {
                             count++;
                             if (count < 6) continue;
                             else break;
@@ -146,8 +151,10 @@ namespace ScrappingBot
                     driver.FindElement(By.Id("otherinformation_addbutton")).Click();
 
                     var locationInfo = driver.FindElement(By.Id("ef_useraddressbookid"));
+
                     selectElement = new SelectElement(locationInfo);
-                    selectElement.SelectByValue("ChooseRbYard");
+                    //selectElement.SelectByValue("ChooseRbYard");
+                    selectElement.Options[selectElement.Options.Count- 1].Click();
 
                     count = 0;
                     while (true)
@@ -168,10 +175,12 @@ namespace ScrappingBot
                             else break;
                         }
                     }
+
                     //driver.FindElements(By.ClassName("image_uploader_button"))[0].Click();
 
-                    string[] fileNames = fieldValue[9].Split('#');
-                    string fullFileNames = directoryPath + string.Join(" \n " + directoryPath, fileNames);
+                    List<string> fileNames = fieldValue[9].Split('#').ToList<string>();
+                    fileNames.Insert(1, "Product_2.jpg");
+                    string fullFileNames = directoryPath + string.Join(" \n " + directoryPath, fileNames.ToArray());
                     try
                     {
                         driver.FindElement(By.XPath("//input[@type='file']")).SendKeys(fullFileNames);
@@ -251,7 +260,7 @@ namespace ScrappingBot
 
                     try
                     {
-                       // driver.SwitchTo().Alert().Accept();
+                       driver.SwitchTo().Alert().Accept();
                     }
                     catch (NoAlertPresentException ex)
                     {
